@@ -1,9 +1,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { connect } from 'react-redux';
-import { signIn, signOut } from '../actions';
+import { useSelector, useDispatch } from 'react-redux';
+import { signIn, signOut } from '../features/auth/authSlice';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,63 +21,57 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const GoogleAuth = () => {
+  const isSignedIn = useSelector((state) => state.auth.isSignedIn);
+  const dispatch = useDispatch();
   const [user] = useAuthState(auth);
-  console.log(this.props);
 
-  return <div>{user ? <SignOut /> : <SignIn />}</div>;
-};
+  useEffect(() => {
+    if (user) {
+      dispatch(signIn(user.uid));
+    }
+  }, [user, dispatch]);
 
-const SignIn = () => {
-  const signInWithGoogle = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const payload = {
-          isSignedIn: true,
-          user: result.user,
-        };
-        this.props.signIn(payload);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-  return (
-    <button
-      className='ui blue basic button'
-      onClick={signInWithGoogle}
-    >
-      <i className='google icon' />
-      Sign in with Google
-    </button>
-  );
-};
-
-const SignOut = () => {
-  const signOutClick = () => {
-    auth.signOut();
-    const payload = {
-      isSignedIn: false,
-      user: null,
+  const SignIn = () => {
+    const signInWithGoogle = () => {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          dispatch(signIn(result.user.uid));
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     };
-    this.props.signOut(payload);
+    return (
+      <button
+        className='ui blue basic button'
+        onClick={signInWithGoogle}
+      >
+        <i className='google icon' />
+        Sign in with Google
+      </button>
+    );
   };
 
-  return (
-    auth.currentUser && (
-      <button
-        className='google red button ui'
-        onClick={signOutClick}
-      >
-        Sign Out
-      </button>
-    )
-  );
+  const SignOut = () => {
+    const signOutClick = () => {
+      auth.signOut();
+      dispatch(signOut());
+    };
+
+    return (
+      auth.currentUser && (
+        <button
+          className='google red button ui'
+          onClick={signOutClick}
+        >
+          Sign Out
+        </button>
+      )
+    );
+  };
+
+  return <div>{isSignedIn ? <SignOut /> : <SignIn />}</div>;
 };
 
-const mapStateToProps = (state) => {
-  console.log(state);
-  return state.auth;
-};
-
-export default connect(mapStateToProps, { signIn, signOut })(GoogleAuth);
+export default GoogleAuth;

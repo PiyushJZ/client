@@ -5,14 +5,20 @@ const Header = () => {
   return (
     <div className='ui secondary pointing menu'>
       <Link
-        to='/'
+        to={'/'}
         className='item'
       >
         Streamy
       </Link>
+      <Link
+        to={'streams/new'}
+        className='item'
+      >
+        Create
+      </Link>
       <div className='right menu'>
         <Link
-          to='/'
+          to={'/'}
           className='item'
         >
           All Streams
