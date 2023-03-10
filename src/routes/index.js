@@ -28,7 +28,7 @@ const router = createBrowserRouter([
         element: <StreamDelete />,
       },
       {
-        path: 'streams/show/:id',
+        path: 'streams/:id',
         element: <StreamShow />,
       },
     ],
